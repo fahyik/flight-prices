@@ -4,9 +4,11 @@
 Simple script making use of Selenium to poll Swiss website for flight prices
 
 """
+from fake_useragent import UserAgent
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
@@ -36,7 +38,13 @@ class SwissAirfareCrawler():
         return self._results
 
     def __connect(self):
-        self.driver = webdriver.PhantomJS()
+
+        # self.driver = webdriver.PhantomJS()
+
+        # connect using a random user agent
+        desired_capabilities = DesiredCapabilities.PHANTOMJS.copy()
+        desired_capabilities['phantomjs.page.settings.userAgent'] = UserAgent().random
+        self.driver = webdriver.PhantomJS(desired_capabilities=desired_capabilities)
 
         # have to init a random window size, otherwise we get elements invisible errors
         self.driver.set_window_size(1124, 850)
@@ -129,3 +137,8 @@ class SwissAirfareCrawler():
 
         else:
             raise Exception("Length of results do not match!")
+
+if __name__ == '__main__':
+    swiss = SwissAirfareCrawler()
+    swiss.get_prices()
+    swiss.print_results()
